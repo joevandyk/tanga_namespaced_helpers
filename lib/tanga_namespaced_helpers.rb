@@ -5,6 +5,14 @@ require "tanga_namespaced_helpers/version"
 module TangaNamespacedHelpers
   def self.reset! controller
     @view = controller.view_context
+
+    # Hack to get Haml helpers available
+    if defined? Haml
+      class << @view
+        include Haml::Helpers
+      end
+      @view.init_haml_helpers
+    end
   end
 
   def self.view
