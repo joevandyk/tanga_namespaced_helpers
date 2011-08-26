@@ -7,13 +7,7 @@ module YourApp::Helpers::Links
   extend TangaNamespacedHelpers
 
   def self.tanga_points user
-    link_to(pluralize(user.total_points, "Tanga Point"),
-            leaderboards_path(:user_id => user.id))
-
-    # You can also access the view directory with:
-    view.link_to(view.pluralize(user.total_points, "Tanga Point"),
-                 view.leaderboards_path(:user_id => user.id))
-    # I'm not sure which is better here.  The first is less magic, more explicit.
+    link_to(pluralize(user.total_points, "Tanga Point"), leaderboards_path(:user_id => user.id))
   end
 end  
 
