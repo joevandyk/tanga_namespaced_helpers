@@ -1,4 +1,3 @@
-
 No longer suffer the tyranny of 10 billion helper methods scattered throughout
 files without hierarchy.
 
@@ -16,6 +15,9 @@ Your View:
 <%= YourApp::Helpers::Links.tanga_points(user) %>
 
 For shorter code, in an initializer or something, do:
+
 H = YourApp::Helpers
+
 Then your views can do:
-<%= H::Links.tanga_points(user)
+
+<%= H::Links.tanga_points(user) %>
