@@ -41,3 +41,8 @@ end
 
 
 ActionController::Base.send :include, TangaNamespacedHelpers::ControllerMethods
+
+class ActionMailer::Base
+  # This is necessary to use namespaced helpers from the actionmailer views
+  default 'init-view' => Proc.new { TangaNamespacedHelpers.reset!(self) }
+end
