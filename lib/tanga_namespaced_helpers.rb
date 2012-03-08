@@ -23,7 +23,7 @@ module TangaNamespacedHelpers
   end
 
   def self.use_controller!
-    @view = @original_context
+    @view = @original_context if @original_context
   end
 
   # TODO Gotta be a better way to do this.
@@ -38,8 +38,11 @@ module TangaNamespacedHelpers
     # So, if there's a NoMethodError (i.e. access the session after ActionMailer
     # resets the context), we need to reset it to the original controller
     # for the request and try one more time.
-    TangaNamespacedHelpers.use_controller!
-    view.send *args, &block
+    if TangaNamespacedHelpers.use_controller!
+      view.send *args, &block
+    else
+      raise
+    end
   end
 
   module ControllerMethods
