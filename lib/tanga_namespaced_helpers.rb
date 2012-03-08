@@ -5,6 +5,9 @@ require "tanga_namespaced_helpers/version"
 module TangaNamespacedHelpers
   def self.reset! controller
     @view = controller.view_context
+    if controller.is_a?(ActionController::Base)
+      @controller = controller
+    end
 
     # Hack to get Haml helpers available
     if defined? Haml
@@ -19,13 +22,34 @@ module TangaNamespacedHelpers
     @view
   end
 
+  def self.controller
+    @controller
+  end
+
   # TODO Gotta be a better way to do this.
   def view
     TangaNamespacedHelpers.view
   end
 
+  def controller
+    TangaNamespacedHelpers.controller
+  end
+
   def method_missing *args, &block
+    retry_count ||= 0
     view.send *args, &block
+  rescue NoMethodError
+    # This is pretty stupid.  ActionMailer sometimes resets the current view context.
+    # So, if there's a NoMethodError (i.e. access the session after ActionMailer
+    # resets the context), we need to reset it to the original controller
+    # for the request and try one more time.
+    if retry_count == 0
+      TangaNamespacedHelpers.reset!(controller)
+      retry_count += 1
+      retry
+    else
+      raise
+    end
   end
 
   module ControllerMethods
