@@ -1,23 +1,16 @@
 No longer suffer the tyranny of 10 billion helper methods scattered throughout
 files without hierarchy.
 
-Your Code in lib/your_app/helpers/links.rb:
-module YourApp::Helpers::Links
+Your Code in app/helpers/links_helper.rb:
+module LinksHelper
   extend TangaNamespacedHelpers
 
   def self.tanga_points user
-    link_to(pluralize(user.total_points, "Tanga Point"), leaderboards_path(:user_id => user.id))
+    link_to(pluralize(user.total_points, "Tanga Point"), 
+            leaderboards_path(:user_id => user.id))
   end
 end  
 
 
 Your View:
-<%= YourApp::Helpers::Links.tanga_points(user) %>
-
-For shorter code, in an initializer or something, do:
-
-H = YourApp::Helpers
-
-Then your views can do:
-
-<%= H::Links.tanga_points(user) %>
+<%= LinksHelper.tanga_points(user) %>
