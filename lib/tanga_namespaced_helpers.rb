@@ -1,34 +1,54 @@
 require "tanga_namespaced_helpers/version"
+require 'request_store'
+
+module Rooster
+  def self.view_context
+    RequestStore.store[:view_context]
+  end
+
+  def self.view_context= context
+    RequestStore.store[:view_context] = context
+  end
+
+  # Workaround for ActionMMailer apparently resetting some of the view context sometimes.
+  def self.original_view_context
+    RequestStore.store[:original_view_context]
+  end
+
+  def self.original_view_context= context
+    RequestStore.store[:original_view_context] = context
+  end
+end
 
 # This probably isn't the best way to structure the code.
 # Stupid name, bad code, no tests, etc.
 module TangaNamespacedHelpers
   def self.reset! controller
-    @view = controller.view_context
-    if controller.is_a?(ActionController::Base)
-      @original_context = @view
-    end
+    view_context = controller.view_context
 
     # Hack to get Haml helpers available
     if defined? Haml
-      class << @view
+      class << view_context
         include Haml::Helpers
       end
-      @view.init_haml_helpers
+      view_context.init_haml_helpers
     end
-  end
+    Rooster.view_context = view_context
 
-  def self.view
-    @view
+    if controller.is_a?(ActionController::Base)
+      Rooster.original_view_context = view_context
+    end
+
   end
 
   def self.use_controller!
-    @view = @original_context if @original_context
+    if Rooster.original_view_context
+      Rooster.view_context = Rooster.original_view_context
+    end
   end
 
-  # TODO Gotta be a better way to do this.
   def view
-    TangaNamespacedHelpers.view
+    Rooster.view_context
   end
 
   def method_missing *args, &block
@@ -51,11 +71,10 @@ module TangaNamespacedHelpers
     end
 
     def reset_namespace_view_context
-      TangaNamespacedHelpers.reset! self
+      TangaNamespacedHelpers.reset!(self)
     end
   end
 end
-
 
 ActionController::Base.send :include, TangaNamespacedHelpers::ControllerMethods
 
@@ -63,3 +82,4 @@ class ActionMailer::Base
   # This is necessary to use namespaced helpers from the actionmailer views
   default 'init-view' => Proc.new { TangaNamespacedHelpers.reset!(self) }
 end
+
